@@ -1,5 +1,41 @@
 <?php
-include 'lib/secure.php';
+    include 'lib/secure.php';
+    include 'lib/connect.php';
+    include 'lib/queryArticle.php';
+    include 'lib/article.php';
+
+
+    $title = "";        // タイトル
+    $body = "";         // 本文
+    $title_alert = "";  // タイトルのエラー文言
+    $body_alert = "";   // 本文のエラー文言
+
+    if (!empty($_POST['title']) && !empty($_POST['body'])) {
+        // titleとbodyがPOSTメソッドで送信されたとき
+        $title = $_POST['title'];
+        $body = $_POST['body'];
+
+        $article = new Article();
+        $article->setTitle($title);
+        $article->setBody($body);
+        $article->save();
+        
+        header('Location: backend.php');
+    } else if (!empty($_POST)) {
+        // POSTメソッドで送信されたが、titleかbodyが足りないとき
+        // 存在するほうは変数へ、ない場合空文字にしてフォームのvalueに設定する
+        if (!empty($_POST['title'])) {
+            $title = $_POST['title'];
+        } else {
+            $title_alert = "タイトルを入力してください。";
+        }
+
+        if (!empty($_POST['body'])) {
+            $body = $_POST['body'];
+        } else {
+            $body_alert = "本文を入力してください。";
+        }
+    }
 ?>
 <!doctype html>
 <html lang="ja">
@@ -13,27 +49,27 @@ include 'lib/secure.php';
     <link href="./css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        body {
-            padding-top: 5rem;
-        }
+    body {
+        padding-top: 5rem;
+    }
 
-        .bd-placeholder-img {
-            font-size: 1.125rem;
-            text-anchor: middle;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
-        }
+    .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+    }
 
-        @media (min-width: 768px) {
-            .bd-placeholder-img-lg {
-                font-size: 3.5rem;
-            }
+    @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+            font-size: 3.5rem;
         }
+    }
 
-        .bg-red {
-            background-color: #ff6644 !important;
-        }
+    .bg-red {
+        background-color: #ff6644 !important;
+    }
     </style>
 
     <!-- Custom styles for this template -->
@@ -51,11 +87,13 @@ include 'lib/secure.php';
                 <form action="post.php" method="post">
                     <div class="mb-3">
                         <label class="form-label">タイトル</label>
-                        <input type="text" name="title" class="form-control">
+                        <?php echo !empty($title_alert) ? '<div class="alert alert-danger">' . $title_alert . '</div>' : '' ?>
+                        <input type="text" name="title" value="<?php echo $title; ?>" class="form-control">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">本文</label>
-                        <textarea name="body" class="form-control" rows="10"></textarea>
+                        <?php echo !empty($body_alert) ? '<div class="alert alert-danger">' . $body_alert . '</div>' : '' ?>
+                        <textarea name="body" class="form-control" rows="10"><?php echo $body; ?></textarea>
                     </div>
                     <div class="mb-3">
                         <button type="submit" class="btn btn-primary">投稿する</button>
